@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import { Link, Outlet, useNavigate, useLocation } from "react-router-dom";
-import { QrCode, Scan, Users, Menu, X } from "lucide-react";
+import { QrCode, Scan, Users, Menu, X, LogOut } from "lucide-react";
 
 const Navbar = () => {
   const navigate = useNavigate();
@@ -17,6 +17,13 @@ const Navbar = () => {
   const handleNavigate = (page) => {
     if (page === "scanner") navigate("/");
     if (page === "data") navigate("/DataMahasiswa");
+    setMobileMenuOpen(false);
+  };
+
+  const handleLogout = () => {
+    // contoh: hapus token dari localStorage
+    localStorage.removeItem("token");
+    navigate("/login"); // arahkan ke halaman login
     setMobileMenuOpen(false);
   };
 
@@ -70,6 +77,15 @@ const Navbar = () => {
               <div className="bg-yellow-400 text-gray-800 px-3 py-1 rounded-full text-xs font-medium ml-2">
                 OFT 2025
               </div>
+
+              {/* Logout Button */}
+              <button
+                className="px-3 lg:px-4 py-2 rounded-lg font-medium flex items-center space-x-2 text-red-200 hover:text-white hover:bg-red-500/20 transition"
+                onClick={handleLogout}
+              >
+                <LogOut size={16} />
+                <span>Logout</span>
+              </button>
             </div>
 
             {/* Mobile Button */}
@@ -110,6 +126,16 @@ const Navbar = () => {
                 <Users size={20} />
                 <span>Data Mahasiswa</span>
               </button>
+
+              {/* Logout Mobile */}
+              <button
+                className="w-full text-left px-4 py-3 rounded-lg font-medium flex items-center space-x-3 text-red-200 hover:text-white hover:bg-red-500/20"
+                onClick={handleLogout}
+              >
+                <LogOut size={20} />
+                <span>Logout</span>
+              </button>
+
               <div className="px-4 py-2">
                 <div className="bg-yellow-400 text-gray-800 px-3 py-2 rounded-full text-sm font-medium inline-flex items-center">
                   <span className="w-2 h-2 bg-green-500 rounded-full mr-2 animate-pulse"></span>

@@ -1,7 +1,7 @@
 import { createBrowserRouter } from "react-router-dom";
 import Layout from "../Layout/navbar";
 import BarcodeScanner from "../pages/Barcodescanner";
-import DATA from "../pages/DataMahasiswa";
+import DATA from "../pages/Maba";
 import Login from "../pages/login";
 
 const route = createBrowserRouter([

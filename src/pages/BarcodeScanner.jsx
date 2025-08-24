@@ -1,5 +1,4 @@
 import React, { useState, useRef, useEffect } from "react";
-// eslint-disable-next-line no-unused-vars
 import { motion, AnimatePresence } from "framer-motion";
 import {
   QrCode,
@@ -9,123 +8,136 @@ import {
   X,
   AlertCircle,
 } from "lucide-react";
+import Notifikasi from "../components/notifikasi";
 import {
   BrowserMultiFormatReader,
-  DecodeHintType,
   BarcodeFormat,
+  DecodeHintType,
+  NotFoundException,
 } from "@zxing/library";
 
 const BarcodeScanner = ({ onScanSuccess }) => {
-  const codeReaderRef = useRef(null);
   const [isScanning, setIsScanning] = useState(false);
   const [scanResult, setScanResult] = useState("");
   const [manualNim, setManualNim] = useState("");
   const [cameraActive, setCameraActive] = useState(false);
   const [error, setError] = useState("");
   const videoRef = useRef(null);
-  const streamRef = useRef(null);
+  const codeReaderRef = useRef(null);
 
-  // Init ZXing decoder
+  // notif state
+  const [notif, setNotif] = useState({
+    show: false,
+    type: "success",
+    message: "",
+  });
+
   useEffect(() => {
+    // 🚀 fokus hanya ke barcode CODE_128
     const hints = new Map();
-    // ✅ hanya deteksi CODE_128
     hints.set(DecodeHintType.POSSIBLE_FORMATS, [BarcodeFormat.CODE_128]);
+
     codeReaderRef.current = new BrowserMultiFormatReader(hints);
 
     return () => {
       stopCamera();
-      codeReaderRef.current?.reset();
     };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  // Fungsi untuk memulai kamera
+  // fungsi mulai kamera
   const startCamera = async () => {
     try {
       setError("");
       setCameraActive(true);
       setIsScanning(true);
 
-      const stream = await navigator.mediaDevices.getUserMedia({
-        video: {
-          facingMode: "environment",
-          width: { ideal: 1280 },
-          height: { ideal: 720 },
-        },
-      });
-
-      streamRef.current = stream;
-      if (videoRef.current) {
-        videoRef.current.srcObject = stream;
-        await videoRef.current.play();
+      const devices = await codeReaderRef.current.listVideoInputDevices();
+      if (devices.length === 0) {
+        setError("❌ Tidak ada kamera ditemukan.");
+        return;
       }
 
-      setTimeout(() => {
-        startBarcodeDetection();
-      }, 800);
+      // ambil kamera belakang kalau ada
+      const backCamera =
+        devices.find((d) => d.label.toLowerCase().includes("back")) ||
+        devices[0];
+
+      // 🚀 set resolusi lebih rendah biar lebih cepat
+      const constraints = {
+        video: {
+          deviceId: backCamera.deviceId,
+          width: { ideal: 640 },
+          height: { ideal: 480 },
+        },
+      };
+
+      codeReaderRef.current.decodeFromConstraints(
+        constraints,
+        videoRef.current,
+        (result, err) => {
+          if (result) {
+            const text = result.getText();
+            const format = result.getBarcodeFormat();
+
+            setScanResult(text);
+            if (onScanSuccess) onScanSuccess(text);
+
+            console.log("📌 Hasil Scan Barcode:", text, "Format:", format);
+
+            // 🔥 Notifikasi selalu muncul saat CODE_128 terbaca
+            if (format === "CODE_128") {
+              setNotif({
+                show: true,
+                type: "success",
+                message: `📌 Barcode 128 terbaca: ${text}`,
+              });
+            }
+          }
+
+          if (err && !(err instanceof NotFoundException)) {
+            console.warn(err);
+          }
+        }
+      );
     } catch (err) {
       console.error("Error accessing camera:", err);
-      setError(
-        "Tidak dapat mengakses kamera. Pastikan browser memiliki izin kamera."
-      );
+      setError("Tidak bisa mengakses kamera.");
       setCameraActive(false);
       setIsScanning(false);
+
+      setNotif({
+        show: true,
+        type: "error",
+        message: "❌ Tidak bisa akses kamera!",
+      });
     }
   };
 
-  // Fungsi untuk stop kamera
+  // fungsi stop kamera
   const stopCamera = () => {
-    if (streamRef.current) {
-      streamRef.current.getTracks().forEach((track) => track.stop());
-      streamRef.current = null;
+    if (codeReaderRef.current) {
+      codeReaderRef.current.reset();
     }
-    codeReaderRef.current?.reset();
     setCameraActive(false);
     setIsScanning(false);
   };
 
-  // Fungsi deteksi barcode
-  const startBarcodeDetection = () => {
-    if (!videoRef.current || !codeReaderRef.current) return;
-
-    // pastikan stop decoder lama dulu
-    codeReaderRef.current.reset();
-
-    codeReaderRef.current.decodeFromVideoDevice(
-      undefined,
-      videoRef.current,
-      (result, err) => {
-        if (result) {
-          const scannedText = result.getText();
-          console.log("✅ Code detected:", scannedText);
-
-          if (scanResult !== scannedText) {
-            setScanResult(scannedText);
-            if (onScanSuccess) onScanSuccess(scannedText);
-
-            // reset setelah 3 detik (opsional)
-            setTimeout(() => setScanResult(""), 3000);
-          }
-        }
-
-        // filter error biar gak spam
-        if (err && err.name !== "NotFoundException") {
-          console.error("Decode error:", err);
-        }
-      }
-    );
-  };
-
-  // Handler untuk scan barcode
-  const handleScanBarcode = () => {
-    startCamera();
-  };
-
-  // Handler untuk manual input
+  // input manual
   const handleManualSubmit = (e) => {
     e.preventDefault();
     if (manualNim.trim()) {
       setScanResult(manualNim);
       if (onScanSuccess) onScanSuccess(manualNim);
+
+      console.log("✍️ Input Manual:", manualNim);
+
+      setNotif({
+        show: true,
+        type: "success",
+        message: `✍️ Input Manual: ${manualNim}`,
+      });
+
       setManualNim("");
     }
   };
@@ -137,9 +149,17 @@ const BarcodeScanner = ({ onScanSuccess }) => {
       animate={{ scale: 1, opacity: 1 }}
       transition={{ duration: 0.5 }}
     >
+      {/* Notifikasi floating */}
+      <Notifikasi
+        show={notif.show}
+        type={notif.type}
+        message={notif.message}
+        onClose={() => setNotif({ ...notif, show: false })}
+      />
+
       <div className="card-body items-center text-center">
         <motion.h2
-          className="card-title text-2xl mb-4"
+          className="card-title text-2xl mb-4 flex items-center gap-2"
           initial={{ y: -20 }}
           animate={{ y: 0 }}
           transition={{ delay: 0.2 }}
@@ -198,7 +218,7 @@ const BarcodeScanner = ({ onScanSuccess }) => {
 
           <motion.button
             className="btn btn-primary btn-lg w-full mb-4"
-            onClick={handleScanBarcode}
+            onClick={startCamera}
             disabled={cameraActive}
             whileHover={{ scale: cameraActive ? 1 : 1.02 }}
             whileTap={{ scale: cameraActive ? 1 : 0.98 }}
@@ -236,9 +256,7 @@ const BarcodeScanner = ({ onScanSuccess }) => {
                     value={manualNim}
                     onChange={(e) => setManualNim(e.target.value)}
                     onKeyPress={(e) => {
-                      if (e.key === "Enter") {
-                        handleManualSubmit(e);
-                      }
+                      if (e.key === "Enter") handleManualSubmit(e);
                     }}
                   />
                 </div>

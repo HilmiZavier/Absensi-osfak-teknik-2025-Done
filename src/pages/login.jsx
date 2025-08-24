@@ -1,11 +1,15 @@
 import React, { useState } from "react";
 import { GraduationCap, Save, CheckCircle, User } from "lucide-react";
+import { useNavigate } from "react-router-dom";
+import DataMahasiswa from "../Data/DataMahasiswa"; // 👈 import data
 
 export default function NimForm() {
   const [nim, setNim] = useState("");
   const [storedNim, setStoredNim] = useState("");
   const [timestamp, setTimestamp] = useState("");
   const [showSuccess, setShowSuccess] = useState(false);
+
+  const navigate = useNavigate();
 
   const handleSubmit = () => {
     if (!nim.trim()) {
@@ -18,7 +22,21 @@ export default function NimForm() {
       return;
     }
 
-    // Simpan ke state (pengganti sessionStorage)
+    // Cari mahasiswa berdasarkan NIM
+    const mahasiswa = DataMahasiswa.find((m) => m.nim === nim);
+
+    if (!mahasiswa) {
+      alert("NIM tidak terdaftar!");
+      return;
+    }
+
+    // Cek role
+    if (mahasiswa.role === "Peserta") {
+      alert("Akses ditolak! Hanya Admin & Bimpok yang bisa login.");
+      return;
+    }
+
+    // Simpan ke state
     setStoredNim(nim);
     setTimestamp(new Date().toLocaleString("id-ID"));
     setShowSuccess(true);
@@ -26,14 +44,20 @@ export default function NimForm() {
     // Reset form
     setNim("");
 
-    // Hide success message after 3 seconds
+    // Setelah 2 detik redirect
     setTimeout(() => {
       setShowSuccess(false);
-    }, 3000);
+
+      // 👇 bisa diarahkan ke halaman berbeda berdasarkan role
+      if (mahasiswa.role === "Admin") {
+        navigate("/");
+      } else if (mahasiswa.role === "Bimpok") {
+        navigate("/");
+      }
+    }, 2000);
   };
 
   const handleInputChange = (e) => {
-    // Hanya terima input angka
     const value = e.target.value.replace(/[^0-9]/g, "");
     setNim(value);
   };
@@ -49,9 +73,7 @@ export default function NimForm() {
                 <GraduationCap className="w-8 h-8 text-white" />
               </div>
             </div>
-            <h1 className="text-3xl font-bold text-sky-800 mb-2">
-              Form Input NIM
-            </h1>
+            <h1 className="text-3xl font-bold text-sky-800 mb-2">LOGIN</h1>
             <p className="text-sky-600">Masukkan Nomor Induk Mahasiswa Anda</p>
           </div>
 
@@ -70,7 +92,7 @@ export default function NimForm() {
                   value={nim}
                   onChange={handleInputChange}
                   onKeyPress={(e) => e.key === "Enter" && handleSubmit()}
-                  placeholder="Contoh: 2023110001"
+                  placeholder="Contoh: 202311420023"
                   maxLength="15"
                   className="input input-bordered w-full bg-sky-50/50 border-sky-300 focus:border-sky-500 focus:bg-white transition-all duration-300 text-sky-900 placeholder-sky-400"
                   required
@@ -106,52 +128,14 @@ export default function NimForm() {
               <CheckCircle className="w-6 h-6 text-emerald-600" />
               <div>
                 <div className="font-semibold text-emerald-800">
-                  NIM berhasil disimpan!
+                  NIM berhasil login!
                 </div>
                 <div className="text-sm text-emerald-600">
-                  Data Anda telah tersimpan dengan aman
+                  Sedang mengarahkan ke halaman...
                 </div>
               </div>
             </div>
           )}
-
-          {/* Stored Data Display */}
-          {storedNim && (
-            <div className="card bg-gradient-to-r from-sky-50 to-blue-50 border border-sky-200 mt-6">
-              <div className="card-body p-4">
-                <h3 className="card-title text-sky-800 text-lg">
-                  Data Tersimpan
-                </h3>
-                <div className="space-y-2">
-                  <div className="flex items-center justify-between">
-                    <span className="text-sky-600 font-medium">NIM:</span>
-                    <span className="text-sky-900 font-bold text-lg">
-                      {storedNim}
-                    </span>
-                  </div>
-                  <div className="flex items-center justify-between">
-                    <span className="text-sky-600 font-medium">Disimpan:</span>
-                    <span className="text-sky-700 text-sm">{timestamp}</span>
-                  </div>
-                </div>
-                <div className="badge badge-outline badge-info mt-3">
-                  Tersimpan dalam sesi
-                </div>
-              </div>
-            </div>
-          )}
-
-          {/* Info Card */}
-          <div className="card bg-gradient-to-r from-blue-50 to-sky-50 border border-blue-200 mt-4">
-            <div className="card-body p-4">
-              <div className="text-center">
-                <div className="text-blue-600 text-sm">
-                  <strong>💡 Info:</strong> Data NIM akan tersimpan selama sesi
-                  browser berlangsung
-                </div>
-              </div>
-            </div>
-          </div>
         </div>
       </div>
     </div>
