@@ -4,8 +4,11 @@ import DataMahasiswa from "../Data/DataMahasiswa"; // sesuaikan path
 // Contoh status, bisa diganti props/state
 const status = "hadir";
 
-const DataMahasiswaComponent = ({ nimLogin }) => {
-  // Cari data mahasiswa berdasarkan nim
+const DataMahasiswaComponent = () => {
+  // Ambil nim login dari localStorage
+  const nimLogin = localStorage.getItem("nimLogin");
+
+  // Cari data mahasiswa sesuai nim
   const mahasiswa = DataMahasiswa.find((m) => m.nim === nimLogin) || {};
 
   return (

@@ -3,7 +3,7 @@ const DataMahasiswa = [
     nim: "202311420023",
     nama: "Hilmi Zavier ",
     jurusan: "Teknik Informatika",
-    role: "Admin",
+    role: "PIC",
   },
   {
     nim: "2021002",

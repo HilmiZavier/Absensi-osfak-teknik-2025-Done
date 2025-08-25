@@ -1,14 +1,11 @@
 import React, { useState } from "react";
 import { GraduationCap, Save, CheckCircle, User } from "lucide-react";
 import { useNavigate } from "react-router-dom";
-import DataMahasiswa from "../Data/DataMahasiswa"; // 👈 import data
+import DataMahasiswa from "../Data/DataMahasiswa";
 
 export default function NimForm() {
   const [nim, setNim] = useState("");
-  const [storedNim, setStoredNim] = useState("");
-  const [timestamp, setTimestamp] = useState("");
   const [showSuccess, setShowSuccess] = useState(false);
-
   const navigate = useNavigate();
 
   const handleSubmit = () => {
@@ -30,30 +27,22 @@ export default function NimForm() {
       return;
     }
 
-    // Cek role
-    if (mahasiswa.role === "Peserta") {
-      alert("Akses ditolak! Hanya Admin & Bimpok yang bisa login.");
+    // ✅ hanya role PIC yang boleh login
+    if (mahasiswa.role !== "PIC") {
+      alert("Akses ditolak! Hanya PIC yang bisa login.");
       return;
     }
 
-    // Simpan ke state
-    setStoredNim(nim);
-    setTimestamp(new Date().toLocaleString("id-ID"));
-    setShowSuccess(true);
+    // Simpan nim login ke localStorage biar bisa dipakai di halaman lain
+    localStorage.setItem("nimLogin", nim);
 
-    // Reset form
+    setShowSuccess(true);
     setNim("");
 
-    // Setelah 2 detik redirect
+    // Setelah 2 detik redirect ke halaman scanner
     setTimeout(() => {
       setShowSuccess(false);
-
-      // 👇 bisa diarahkan ke halaman berbeda berdasarkan role
-      if (mahasiswa.role === "Admin") {
-        navigate("/");
-      } else if (mahasiswa.role === "Bimpok") {
-        navigate("/");
-      }
+      navigate("/"); // 👈 sesuaikan dengan route scanner kamu
     }, 2000);
   };
 
@@ -86,21 +75,16 @@ export default function NimForm() {
                   Nomor Induk Mahasiswa (NIM)
                 </span>
               </label>
-              <div className="relative">
-                <input
-                  type="text"
-                  value={nim}
-                  onChange={handleInputChange}
-                  onKeyPress={(e) => e.key === "Enter" && handleSubmit()}
-                  placeholder="Contoh: 202311420023"
-                  maxLength="15"
-                  className="input input-bordered w-full bg-sky-50/50 border-sky-300 focus:border-sky-500 focus:bg-white transition-all duration-300 text-sky-900 placeholder-sky-400"
-                  required
-                />
-                <div className="absolute inset-y-0 right-0 flex items-center pr-3">
-                  <div className="w-2 h-2 bg-sky-400 rounded-full animate-pulse"></div>
-                </div>
-              </div>
+              <input
+                type="text"
+                value={nim}
+                onChange={handleInputChange}
+                onKeyPress={(e) => e.key === "Enter" && handleSubmit()}
+                placeholder="Contoh: 202311420023"
+                maxLength="15"
+                className="input input-bordered w-full bg-sky-50/50 border-sky-300 focus:border-sky-500 focus:bg-white transition-all duration-300 text-sky-900 placeholder-sky-400"
+                required
+              />
               <label className="label">
                 <span className="label-text-alt text-sky-500">
                   Hanya masukkan angka
@@ -117,8 +101,7 @@ export default function NimForm() {
               className="btn btn-primary w-full bg-gradient-to-r from-sky-500 to-blue-600 hover:from-sky-600 hover:to-blue-700 border-none text-white font-semibold shadow-lg hover:shadow-xl transition-all duration-300 transform hover:-translate-y-1"
               disabled={!nim.trim()}
             >
-              <Save className="w-5 h-5 mr-2" />
-              Simpan NIM
+              Login
             </button>
           </div>
 
@@ -131,7 +114,7 @@ export default function NimForm() {
                   NIM berhasil login!
                 </div>
                 <div className="text-sm text-emerald-600">
-                  Sedang mengarahkan ke halaman...
+                  Sedang mengarahkan ke halaman scanner...
                 </div>
               </div>
             </div>

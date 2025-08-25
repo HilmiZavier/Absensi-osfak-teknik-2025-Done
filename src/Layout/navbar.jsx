@@ -21,10 +21,27 @@ const Navbar = () => {
   };
 
   const handleLogout = () => {
-    // contoh: hapus token dari localStorage
-    localStorage.removeItem("token");
-    navigate("/login"); // arahkan ke halaman login
-    setMobileMenuOpen(false);
+    -(
+      // contoh: hapus token dari localStorage
+      (-localStorage.removeItem("token"))
+    );
+    -navigate("/login"); // arahkan ke halaman login
+    -setMobileMenuOpen(false);
+    +(
+      // Hapus nim login dari localStorage
+      (+localStorage.removeItem("nimLogin"))
+    );
+    +(+(
+      // Kalau kamu nanti juga pakai token, bisa tambahin removeItem("token")
+      (+(+(
+        // Arahkan ke halaman login
+        (+navigate("/login"))
+      )))
+    ));
+    +(+(
+      // Tutup menu mobile kalau terbuka
+      (+setMobileMenuOpen(false))
+    ));
   };
 
   return (

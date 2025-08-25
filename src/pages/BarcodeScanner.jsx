@@ -81,11 +81,16 @@ const BarcodeScanner = ({ onScanSuccess }) => {
             const format = result.getBarcodeFormat();
 
             setScanResult(text);
+            setManualNim(text);
+            stopCamera();
+
             if (onScanSuccess) onScanSuccess(text);
+
+            // 🚀 simpan nim ke localStorage biar DataMahasiswaComponent bisa ambil
+            localStorage.setItem("nimLogin", text);
 
             console.log("📌 Hasil Scan Barcode:", text, "Format:", format);
 
-            // 🔥 Notifikasi selalu muncul saat CODE_128 terbaca
             if (format === "CODE_128") {
               setNotif({
                 show: true,
@@ -131,6 +136,7 @@ const BarcodeScanner = ({ onScanSuccess }) => {
       if (onScanSuccess) onScanSuccess(manualNim);
 
       console.log("✍️ Input Manual:", manualNim);
+      localStorage.setItem("nimLogin", manualNim);
 
       setNotif({
         show: true,

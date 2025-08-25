@@ -3,6 +3,7 @@ import Layout from "../Layout/navbar";
 import BarcodeScanner from "../pages/Barcodescanner";
 import DATA from "../pages/Maba";
 import Login from "../pages/login";
+import ProtectedRoute from "./ProtectedRoute";
 
 const route = createBrowserRouter([
   {
@@ -11,11 +12,19 @@ const route = createBrowserRouter([
     children: [
       {
         path: "/",
-        element: <BarcodeScanner />,
+        element: (
+          <ProtectedRoute>
+            <BarcodeScanner />
+          </ProtectedRoute>
+        ),
       },
       {
         path: "/DataMahasiswa",
-        element: <DATA />,
+        element: (
+          <ProtectedRoute>
+            <DATA />
+          </ProtectedRoute>
+        ),
       },
       { path: "login", element: <Login /> },
     ],
