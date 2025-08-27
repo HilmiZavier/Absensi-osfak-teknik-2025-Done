@@ -1,4 +1,5 @@
 import React, { useState, useRef, useEffect } from "react";
+// eslint-disable-next-line no-unused-vars
 import { motion, AnimatePresence } from "framer-motion";
 import {
   QrCode,
@@ -15,7 +16,6 @@ import {
   DecodeHintType,
   NotFoundException,
 } from "@zxing/library";
-import api from "../Data/Data";
 
 const BarcodeScanner = ({ onScanSuccess }) => {
   const [isScanning, setIsScanning] = useState(false);
@@ -43,11 +43,12 @@ const BarcodeScanner = ({ onScanSuccess }) => {
     return () => {
       stopCamera();
     };
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   // fungsi mulai kamera
+  // fungsi mulai kamera
   const startCamera = async () => {
+    const pic = localStorage.getItem("nimLogin");
     try {
       setError("");
       setCameraActive(true);
@@ -59,22 +60,14 @@ const BarcodeScanner = ({ onScanSuccess }) => {
         return;
       }
 
-      // ambil kamera belakang kalau ada
+      // 🔑 ambil kamera belakang kalau ada
       const backCamera =
         devices.find((d) => d.label.toLowerCase().includes("back")) ||
         devices[0];
 
-      // 🚀 set resolusi lebih rendah biar lebih cepat
-      const constraints = {
-        video: {
-          deviceId: backCamera.deviceId,
-          width: { ideal: 640 },
-          height: { ideal: 480 },
-        },
-      };
-
-      codeReaderRef.current.decodeFromConstraints(
-        constraints,
+      // 🚀 langsung decode dari kamera belakang (tanpa stop, tanpa delay)
+      await codeReaderRef.current.decodeFromVideoDevice(
+        backCamera.deviceId,
         videoRef.current,
         (result, err) => {
           if (result) {
@@ -83,14 +76,24 @@ const BarcodeScanner = ({ onScanSuccess }) => {
 
             setScanResult(text);
             setManualNim(text);
-            stopCamera();
 
             if (onScanSuccess) onScanSuccess(text);
 
-            // 🚀 simpan nim ke localStorage biar DataMahasiswaComponent bisa ambil
-            localStorage.setItem("nimLogin", text);
-
             console.log("📌 Hasil Scan Barcode:", text, "Format:", format);
+
+            fetch("https://absences-pied.vercel.app/api/v1/absence", {
+              method: "POST",
+              headers: {
+                "Content-Type": "application/json", // 🔑 penting
+              },
+              body: JSON.stringify({
+                picNim: pic,
+                participantNim: text,
+              }),
+            })
+              .then((res) => res.json())
+              .then((data) => console.log("✅ Response:", data))
+              .catch((err) => console.log("❌ Error:", err));
 
             if (format === "CODE_128") {
               setNotif({
@@ -99,10 +102,13 @@ const BarcodeScanner = ({ onScanSuccess }) => {
                 message: `📌 Barcode 128 terbaca: ${text}`,
               });
             }
+
+            // 🔑 reset supaya bisa baca barcode yang sama lagi detik itu juga
+            codeReaderRef.current.reset();
           }
 
           if (err && !(err instanceof NotFoundException)) {
-            console.warn(err);
+            console.warn("⚠️ ZXing Error:", err);
           }
         }
       );
@@ -162,11 +168,9 @@ const BarcodeScanner = ({ onScanSuccess }) => {
           participantNim: manualNim,
         }),
       })
-        .then(res => res.json())
-        .then(data => console.log(data))
-        .catch(err => console.log(err));
-
-
+        .then((res) => res.json())
+        .then((data) => console.log(data))
+        .catch((err) => console.log(err));
 
       setManualNim("");
     }

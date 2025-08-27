@@ -10,25 +10,23 @@ export default function NimForm() {
   const navigate = useNavigate();
 
   const handleFetch = async (url) => {
-    try{
+    try {
       const response = await fetch(url);
 
-      if(!response.ok){
-        throw new Error(`response status ${response.status}`)
+      if (!response.ok) {
+        throw new Error(`response status ${response.status}`);
       }
 
       const result = await response.json();
       // setResult(result)
-      return result
-    }catch(e){
-      console.log(e)
+      return result;
+    } catch (e) {
+      console.log(e);
     }
-  }
+  };
 
   const handleSubmit = async () => {
-    const url = `https://absences-pied.vercel.app/api/v1/user/${nim}`
-    
-    
+    const url = `https://absences-pied.vercel.app/api/v1/user/${nim}`;
 
     if (!nim.trim()) {
       alert("Harap masukkan NIM!");
@@ -43,9 +41,7 @@ export default function NimForm() {
     // Cari mahasiswa berdasarkan NIM
     const mahasiswa = await handleFetch(url);
     // const mahasiswa = result
-    console.log(mahasiswa)
-
-
+    console.log(mahasiswa);
 
     if (!mahasiswa) {
       alert("NIM tidak terdaftar!");
@@ -68,7 +64,7 @@ export default function NimForm() {
     setTimeout(() => {
       setShowSuccess(false);
       navigate("/"); // 👈 sesuaikan dengan route scanner kamu
-    }, 2000);
+    }, 0);
   };
 
   const handleInputChange = (e) => {

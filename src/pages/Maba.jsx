@@ -8,35 +8,34 @@ import { data } from "react-router-dom";
 const status = "hadir";
 
 const DataMahasiswaComponent = () => {
-const [mahasiswa,setMahasiswa] = useState({});
-const [participants,setParticipants] = useState([]);
+  const [mahasiswa, setMahasiswa] = useState({});
+  const [participants, setParticipants] = useState([]);
   // Ambil nim login dari localStorage
-  useEffect(()=>{
-    const fetchData = async () =>{
+  useEffect(() => {
+    const fetchData = async () => {
       const nimLogin = localStorage.getItem("nimLogin");
-      console.log(nimLogin)
+      console.log(nimLogin);
 
-      if(!nimLogin){
+      if (!nimLogin) {
         return;
       }
-      
 
-      try{
+      try {
         const pic = await api.get(`/user/${nimLogin}`);
         const datapic = pic.data;
-        setMahasiswa(datapic)
+        setMahasiswa(datapic);
 
-        console.log(datapic)
+        console.log(datapic);
 
-        const participatsReq = datapic.participants.map(
-          p => api.get(`/absence/${p.id}`)
+        const participatsReq = datapic.participants.map((p) =>
+          api.get(`/absence/${p.id}`)
         );
 
         // 3. Tunggu semua request selesai
         const responses = await Promise.all(participatsReq);
 
         // 4. Ambil data user dari tiap response
-        const participantData = responses.map(r => r.data);
+        const participantData = responses.map((r) => r.data);
 
         // 1. Get today's date (without time)
         const today = new Date().toISOString().split("T")[0];
@@ -47,18 +46,16 @@ const [participants,setParticipants] = useState([]);
           return createdDate === today;
         });
 
-
-        console.log("this is participant data\n",participantData);
+        console.log("this is participant data\n", participantData);
         setParticipants(participantData);
-      }catch(e){
-        console.log(e,"soemthing wrong with fetch")
+      } catch (e) {
+        console.log(e, "soemthing wrong with fetch");
       }
-    }
+    };
 
     fetchData();
-  },[])
+  }, []);
 
-  
   // Cari data mahasiswa sesuai nim
   // const mahasiswa = DataMahasiswa.find((m) => m.nim === nimLogin) || {};
   if (!mahasiswa || !mahasiswa.nim) {
@@ -80,78 +77,85 @@ const [participants,setParticipants] = useState([]);
       </section>
 
       {participants.map((participant) => (
-      <section className="bg-gray-500 p-4 sm:p-4 m-3 mt-1 sm:mt-1 rounded-xl shadow-2xl shadow-blue-500 text-gray-200"
-        key={participant.id}
-      >
-        {/* Mobile Layout */}
-
+        <section
+          className="bg-gray-500 p-4 sm:p-4 m-3 mt-1 sm:mt-1 rounded-xl shadow-2xl shadow-blue-500 text-gray-200"
+          key={participant.id}
+        >
+          {/* Mobile Layout */}
 
           <div className="flex flex-col gap-2 sm:hidden">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center gap-2">
-              <User size={16} className="text-gray-200 flex-shrink-0" />
-              <span className="font-bold text-sm">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-2">
+                <User size={16} className="text-gray-200 flex-shrink-0" />
+                <span className="font-bold text-sm">
+                  {participant.participant.nim || "NIM"}
+                </span>
+              </div>
+              <div className="flex-shrink-0">
+                {status === "hadir" ? (
+                  <span className="inline-flex items-center gap-1 px-2 py-1 bg-green-600 text-green-100 rounded-full text-xs">
+                    <Check size={12} />
+                    <span>Hadir</span>
+                  </span>
+                ) : (
+                  <span className="inline-flex items-center gap-1 px-2 py-1 bg-red-600 text-red-100 rounded-full text-xs">
+                    <Minus size={12} />
+                    <span>Tidak</span>
+                  </span>
+                )}
+              </div>
+            </div>
+            <div className="text-sm font-medium pl-6">
+              {participant.participant.name || "Nama Mahasiswa"}
+            </div>
+            <div className="text-xs text-gray-300 pl-6">
+              {participant.participant.prodi || "Jurusan"}
+            </div>
+            <div className="text-xs text-gray-300 pl-6">
+              {participant.createdAt || "created"}
+            </div>
+          </div>
+
+          {/* Desktop/Tablet Layout */}
+
+          <div className="hidden sm:flex sm:items-center sm:gap-4 lg:gap-6 font-sans text-sm lg:text-base">
+            <div className="flex items-center gap-2 flex-shrink-0">
+              <User size={16} className="text-gray-200" />
+              <span className="font-bold">
                 {participant.participant.nim || "NIM"}
               </span>
             </div>
-            <div className="flex-shrink-0">
+            <div className="min-w-0 flex-shrink-0">
+              <span className="break-words">
+                {participant.participant.name || "nama"}
+              </span>
+            </div>
+            <div className="min-w-0 flex-shrink-0">
+              <span className="break-words">
+                {participant.participant.prodi || "Jurusan"}
+              </span>
+            </div>
+            <div className="min-w-0 flex-shrink-0">
+              <span className="break-words">
+                {participant.createdAt || "Jurusan"}
+              </span>
+            </div>
+            <div className="ml-auto flex-shrink-0">
               {status === "hadir" ? (
-                <span className="inline-flex items-center gap-1 px-2 py-1 bg-green-600 text-green-100 rounded-full text-xs">
-                  <Check size={12} />
+                <span className="inline-flex items-center gap-1 px-3 py-1 bg-green-600 text-green-100 rounded-full text-sm">
+                  <Check size={14} />
                   <span>Hadir</span>
                 </span>
               ) : (
-                <span className="inline-flex items-center gap-1 px-2 py-1 bg-red-600 text-red-100 rounded-full text-xs">
-                  <Minus size={12} />
+                <span className="inline-flex items-center gap-1 px-3 py-1 bg-red-600 text-red-100 rounded-full text-sm">
+                  <Minus size={14} />
                   <span>Tidak</span>
                 </span>
               )}
             </div>
           </div>
-          <div className="text-sm font-medium pl-6">
-            {participant.participant.name  || "Nama Mahasiswa"}
-          </div>
-          <div className="text-xs text-gray-300 pl-6">
-            {participant.participant.prodi || "Jurusan"}
-          </div>
-        </div>
-
-        
-
-        {/* Desktop/Tablet Layout */}
-
-
-        <div className="hidden sm:flex sm:items-center sm:gap-4 lg:gap-6 font-sans text-sm lg:text-base">
-          <div className="flex items-center gap-2 flex-shrink-0">
-            <User size={16} className="text-gray-200" />
-            <span className="font-bold">{participant.participant.nim || "NIM"}</span>
-          </div>
-          <div className="min-w-0 flex-shrink-0">
-            <span className="break-words">{participant.participant.name || "nama"}</span>
-          </div>
-          <div className="min-w-0 flex-shrink-0">
-            <span className="break-words">
-              {participant.participant.prodi || "Jurusan"}
-            </span>
-          </div>
-          <div className="ml-auto flex-shrink-0">
-            {status === "hadir" ? (
-              <span className="inline-flex items-center gap-1 px-3 py-1 bg-green-600 text-green-100 rounded-full text-sm">
-                <Check size={14} />
-                <span>Hadir</span>
-              </span>
-            ) : (
-              <span className="inline-flex items-center gap-1 px-3 py-1 bg-red-600 text-red-100 rounded-full text-sm">
-                <Minus size={14} />
-                <span>Tidak</span>
-              </span>
-            )}
-          </div>
-        </div>
-
-      </section>
-        ))
-        }
+        </section>
+      ))}
     </>
   );
 };
