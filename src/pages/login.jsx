@@ -6,9 +6,30 @@ import DataMahasiswa from "../Data/DataMahasiswa";
 export default function NimForm() {
   const [nim, setNim] = useState("");
   const [showSuccess, setShowSuccess] = useState(false);
+  const [result, setResult] = useState();
   const navigate = useNavigate();
 
-  const handleSubmit = () => {
+  const handleFetch = async (url) => {
+    try{
+      const response = await fetch(url);
+
+      if(!response.ok){
+        throw new Error(`response status ${response.status}`)
+      }
+
+      const result = await response.json();
+      // setResult(result)
+      return result
+    }catch(e){
+      console.log(e)
+    }
+  }
+
+  const handleSubmit = async () => {
+    const url = `https://absences-pied.vercel.app/api/v1/user/${nim}`
+    
+    
+
     if (!nim.trim()) {
       alert("Harap masukkan NIM!");
       return;
@@ -18,9 +39,13 @@ export default function NimForm() {
       alert("NIM hanya boleh berisi angka!");
       return;
     }
-
+    // await handleFetch(url);
     // Cari mahasiswa berdasarkan NIM
-    const mahasiswa = DataMahasiswa.find((m) => m.nim === nim);
+    const mahasiswa = await handleFetch(url);
+    // const mahasiswa = result
+    console.log(mahasiswa)
+
+
 
     if (!mahasiswa) {
       alert("NIM tidak terdaftar!");

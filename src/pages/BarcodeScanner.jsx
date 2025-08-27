@@ -15,6 +15,7 @@ import {
   DecodeHintType,
   NotFoundException,
 } from "@zxing/library";
+import api from "../Data/Data";
 
 const BarcodeScanner = ({ onScanSuccess }) => {
   const [isScanning, setIsScanning] = useState(false);
@@ -136,13 +137,36 @@ const BarcodeScanner = ({ onScanSuccess }) => {
       if (onScanSuccess) onScanSuccess(manualNim);
 
       console.log("✍️ Input Manual:", manualNim);
-      localStorage.setItem("nimLogin", manualNim);
+      // localStorage.setItem("nimLogin", manualNim);
+      const pic = localStorage.getItem("nimLogin");
 
-      setNotif({
-        show: true,
-        type: "success",
-        message: `✍️ Input Manual: ${manualNim}`,
-      });
+      // api.post(`/absence`,
+      //   {
+      //     picNim: pic,
+      //     participantNim: manualNim
+      //   }
+      // ).then(res=>{console.log(res);
+      //   setNotif({
+      //   show: true,
+      //   type: "success",
+      //   message: `✍️ Input Manual: ${manualNim}`,
+      //   });
+      // }
+      // ).catch(e=>{console.log(e)}
+      // )
+
+      fetch("https://absences-pied.vercel.app/api/v1/absence", {
+        method: "POST",
+        body: JSON.stringify({
+          picNim: pic,
+          participantNim: manualNim,
+        }),
+      })
+        .then(res => res.json())
+        .then(data => console.log(data))
+        .catch(err => console.log(err));
+
+
 
       setManualNim("");
     }
