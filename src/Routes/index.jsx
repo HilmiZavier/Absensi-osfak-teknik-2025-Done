@@ -1,6 +1,6 @@
 import { createBrowserRouter } from "react-router-dom";
 import Layout from "../Layout/navbar";
-import BarcodeScanner from "../pages/Barcodescanner";
+import BarcodeScanner from "../pages/BarcodeScanner";
 import DATA from "../pages/Maba";
 import Login from "../pages/login";
 import ProtectedRoute from "./ProtectedRoute";
