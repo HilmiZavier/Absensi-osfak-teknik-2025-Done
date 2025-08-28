@@ -6,7 +6,7 @@ import DataMahasiswa from "../Data/DataMahasiswa";
 export default function NimForm() {
   const [nim, setNim] = useState("");
   const [showSuccess, setShowSuccess] = useState(false);
-  const [result, setResult] = useState();
+  // const [result, setResult] = useState();
   const navigate = useNavigate();
 
   const handleFetch = async (url) => {
@@ -26,7 +26,7 @@ export default function NimForm() {
   };
 
   const handleSubmit = async () => {
-    const url = `https://absences-pied.vercel.app/api/v1/user/${nim}`;
+    const url = `/api/user/${nim}`;
 
     if (!nim.trim()) {
       alert("Harap masukkan NIM!");

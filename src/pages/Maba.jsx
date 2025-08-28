@@ -2,8 +2,8 @@ import React, { useEffect, useState } from "react";
 import { User, Check, Minus } from "lucide-react";
 import api from "../Data/Data";
 import DataMahasiswa from "../Data/DataMahasiswa"; // sesuaikan path
-import { li } from "framer-motion/client";
-import { data } from "react-router-dom";
+// import { li } from "framer-motion/client";
+// import { data } from "react-router-dom";
 // Contoh status, bisa diganti props/state
 const status = "hadir";
 
@@ -14,42 +14,35 @@ const DataMahasiswaComponent = () => {
   useEffect(() => {
     const fetchData = async () => {
       const nimLogin = localStorage.getItem("nimLogin");
-      console.log(nimLogin);
-
-      if (!nimLogin) {
-        return;
-      }
+      if (!nimLogin) return;
 
       try {
         const pic = await api.get(`/user/${nimLogin}`);
         const datapic = pic.data;
         setMahasiswa(datapic);
 
-        console.log(datapic);
+        if (!datapic.participants || datapic.participants.length === 0) {
+          setParticipants([]);
+          return;
+        }
 
         const participatsReq = datapic.participants.map((p) =>
           api.get(`/absence/${p.id}`)
         );
 
-        // 3. Tunggu semua request selesai
         const responses = await Promise.all(participatsReq);
-
-        // 4. Ambil data user dari tiap response
         const participantData = responses.map((r) => r.data);
 
-        // 1. Get today's date (without time)
+        // filter berdasarkan hari ini
         const today = new Date().toISOString().split("T")[0];
-
-        // 2. Filter participants by createdAt
-        const todayParticipants = participants.filter((p) => {
+        const todayParticipants = participantData.filter((p) => {
           const createdDate = new Date(p.createdAt).toISOString().split("T")[0];
           return createdDate === today;
         });
 
-        console.log("this is participant data\n", participantData);
-        setParticipants(participantData);
+        setParticipants(todayParticipants);
       } catch (e) {
-        console.log(e, "soemthing wrong with fetch");
+        console.log(e, "❌ Error fetch Maba.jsx");
       }
     };
 

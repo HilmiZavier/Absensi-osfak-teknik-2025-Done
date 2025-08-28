@@ -12,5 +12,13 @@ export default defineConfig({
     host: '0.0.0.0',            // biar bisa diakses dari network luar
     allowedHosts: ['.ngrok-free.app'], // izinkan semua domain ngrok
     port: 5173,                 // sesuaikan port kalau perlu
+     proxy: {
+    "/api": {
+      target: "https://absences-pied.vercel.app",
+      changeOrigin: true,
+      rewrite: (path) => path.replace(/^\/api/, "/api/v1"),
+    },
   },
+  },
+  
 })

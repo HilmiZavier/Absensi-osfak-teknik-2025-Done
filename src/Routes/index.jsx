@@ -4,6 +4,7 @@ import BarcodeScanner from "../pages/BarcodeScanner";
 import DATA from "../pages/Maba";
 import Login from "../pages/login";
 import ProtectedRoute from "./ProtectedRoute";
+import Absen from "../pages/absen";
 
 const route = createBrowserRouter([
   {
@@ -18,11 +19,19 @@ const route = createBrowserRouter([
           </ProtectedRoute>
         ),
       },
+      // {
+      //   path: "/DataMahasiswa",
+      //   element: (
+      //     <ProtectedRoute>
+      //       <DATA />
+      //     </ProtectedRoute>
+      //   ),
+      // },
       {
         path: "/DataMahasiswa",
         element: (
           <ProtectedRoute>
-            <DATA />
+            <Absen />
           </ProtectedRoute>
         ),
       },

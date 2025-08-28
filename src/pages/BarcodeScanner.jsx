@@ -81,7 +81,7 @@ const BarcodeScanner = ({ onScanSuccess }) => {
 
             console.log("📌 Hasil Scan Barcode:", text, "Format:", format);
 
-            fetch("https://absences-pied.vercel.app/api/v1/absence", {
+            fetch("/api/absence", {
               method: "POST",
               headers: {
                 "Content-Type": "application/json", // 🔑 penting
@@ -161,7 +161,7 @@ const BarcodeScanner = ({ onScanSuccess }) => {
       // ).catch(e=>{console.log(e)}
       // )
 
-      fetch("https://absences-pied.vercel.app/api/v1/absence", {
+      fetch("/api/absence", {
         method: "POST",
         body: JSON.stringify({
           picNim: pic,
